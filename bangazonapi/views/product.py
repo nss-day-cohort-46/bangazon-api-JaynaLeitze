@@ -103,7 +103,10 @@ class Products(ViewSet):
             data = ContentFile(base64.b64decode(imgstr), name=f'{new_product.id}-{request.data["name"]}.{ext}')
 
             new_product.image_path = data
-
+        try:
+            new_product.full_clean()
+        except ValidationError as ex:
+            return Response({"error": ex.args[0]}, status=status.HTTP_406_NOT_ACCEPTABLE)
         new_product.save()
 
         serializer = ProductSerializer(
